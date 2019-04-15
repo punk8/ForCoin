@@ -28,10 +28,12 @@ func main() {
 	blockTwo := "blockTwo"
 	B2 := common.BlockHash(sha256.Sum256([]byte(blockTwo)))
 	TxInputs := []core.TxInput{}
-	SendTo := []core.TxOutput{}
+	txout := core.TxOutput{OutputAddress:&address,Amount:10}
+	SendTo := []core.TxOutput{txout}
+
 	fmt.Println("hello world")
 
-	amount := 11
+
 
 	targetbits := 4
 
@@ -40,7 +42,7 @@ func main() {
 
 
 
-	byte,nonce := core.Pow(&address,&MB,&B1,&B2,TxInputs,SendTo,amount,targetbits)
+	byte,nonce := core.Pow(&address,&MB,&B1,&B2,TxInputs,SendTo,targetbits)
 
 
 
@@ -57,6 +59,14 @@ func main() {
 	fmt.Println("mining...")
 	miner.SendTx(&sendaddress,5)
 
+	//minerName := "punk"
+	//address := common.Address(sha256.Sum256([]byte(minerName)))
+	//txin := []core.TxInput{}
+	//txout := core.TxOutput{OutputAddress:&address,Amount:10}
+	//txouts := []core.TxOutput{txout}
+	//b := core.GetBalance(txin)
+	//c := core.Calculate(txouts)
+	//fmt.Println(b,c)
 
 
 }

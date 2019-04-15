@@ -16,7 +16,7 @@ type PoW struct {
 //pow调用basetool的哈希函数来进行哈希运算
 
 
-func prepareData(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,amount int,targetbits int,nonce int) []byte {
+func prepareData(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,targetbits int,nonce int) []byte {
 
 	txinHash := [][]byte{}
 	for _,tx := range(TxInputs){
@@ -36,7 +36,7 @@ func prepareData(miner *common.Address,Mainblock *common.BlockHash,BlockOne,Bloc
 			[]byte((*Mainblock)[:]),
 			[]byte((*BlockOne)[:]),
 			[]byte((*BlockTwo)[:]),
-			common.IntToHex(int64(amount)),
+
 			common.IntToHex(int64(targetbits)),
 			common.IntToHex(int64(nonce)),
 		},[]byte{},
@@ -47,7 +47,7 @@ func prepareData(miner *common.Address,Mainblock *common.BlockHash,BlockOne,Bloc
 	return data
 }
 
-func Pow(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,amount int,targetbits int) (common.BlockHash,*big.Int) {
+func Pow(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,targetbits int) (common.BlockHash,*big.Int) {
 
 	//return [32]byte{},nonce
 
@@ -67,7 +67,7 @@ func Pow(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *co
 
 
 	for nonce < common.MaxNonce{
-		data := prepareData(miner,Mainblock,BlockOne,BlockTwo,TxInputs,SendTo,amount,targetbits,nonce)//准备好的数据
+		data := prepareData(miner,Mainblock,BlockOne,BlockTwo,TxInputs,SendTo,targetbits,nonce)//准备好的数据
 		//fmt.Println(data)
 		hash = sha256.Sum256(data)//计算出哈希
 		fmt.Printf("\r%x\n",hash)//打印显示哈希

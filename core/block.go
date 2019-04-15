@@ -30,7 +30,7 @@ type Block struct {
 	SendTo []TxOutput
 
 	//交易金额 似乎不用这个字段 因为区块的输入输出都会是一样的 反而如果是主块的话会多出一笔矿工奖励
-	Amount int
+	//Amount int
 
 	//难度值
 	nonce *big.Int
@@ -65,7 +65,7 @@ func (txin *TxInput) ToHash() []byte {
 type TxOutput struct {
 
 	//输出的地址
-	OutputAddress *common.BlockHash
+	OutputAddress *common.Address
 
 	//加密的脚本
 	encScript []byte
@@ -109,25 +109,29 @@ func (txout *TxOutput) ToHash() []byte{
 //}
 
 
-func NewBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,amount int,targetbits int,nonce *big.Int,hash *common.BlockHash)*Block{
-	return &Block{MinerAddress:miner,Hash:hash,Mainblock:Mainblock,BlockOne:BlockOne,BlockTwo:BlockTwo,TxInputs:TxInputs,SendTo:SendTo,Amount:amount,nonce:nonce,targetbits:targetbits}
+func NewBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,targetbits int,nonce *big.Int,hash *common.BlockHash)*Block{
+	return &Block{MinerAddress:miner,Hash:hash,Mainblock:Mainblock,BlockOne:BlockOne,BlockTwo:BlockTwo,TxInputs:TxInputs,SendTo:SendTo,nonce:nonce,targetbits:targetbits}
 }
 
 //在调用该函数时 已经检验过交易的脚本是否满足，交易的输入输出已经构建好
-func CreateBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,amount int,targetbits int) *Block {
+func CreateBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,targetbits int) *Block {
 
 	//判断当前主块是不是最新
 
 	latest := mc.Getlatest()
 	if bytes.Equal(latest[:],Mainblock[:]){
 		//如果是最新的话,验证两笔交易
+
+
 		// 如果所有输入块有足够的余额用于输出 其实用户交易时已经经过检测
-		if GetBalance(TxInputs) >= amount && Calculate(SendTo) >= amount {
+
+		//判断输入是否等于输出 且输出的第一笔矿工奖励是不是合法的
+		if GetBalance(TxInputs) == Calculate(SendTo){
 
 
-				hash, nonce := Pow(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, amount, targetbits)
+				hash, nonce := Pow(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, targetbits)
 
-				block := NewBlock(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, amount, targetbits, nonce, &hash)
+				block := NewBlock(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, targetbits, nonce, &hash)
 				return block
 			}else {
 				return nil

@@ -33,14 +33,18 @@ func GetBalance(txins []TxInput) int {
 	return balance
 }
 
+
+//去掉第一笔交易
 func Calculate(txouts[]TxOutput) int{
 
 	out := 0
 
-	for i:=0;i<len(txouts);i++{
+	for i:=1;i<len(txouts);i++{
 		txout := txouts[i]
 		out += txout.Amount
 
 	}
 	return out
 }
+
+

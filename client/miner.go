@@ -4,6 +4,7 @@ import (
 	"PunkCoin/common"
 	"PunkCoin/core"
 	"PunkCoin/p2p"
+	"errors"
 	"fmt"
 )
 
@@ -28,6 +29,8 @@ type miner struct {
 
 	//检验机制
 	Check *core.Check
+
+	balance int
 }
 
 var m miner
@@ -39,11 +42,8 @@ func init(){
 	//初始化主块链
 	m.MainChain = core.NewMainChain()
 
-	if m.isminer{
-		m.powtargetbits = 5
-	}else{
-		m.powtargetbits = 2
-	}
+	m.isminer = true
+	m.powtargetbits = common.TargetForMBBits
 
 	//初始化校验工具
 	m.Check = core.NewCheck()
@@ -52,6 +52,7 @@ func init(){
 func Newminer(isminer bool,address common.Address) *miner{
 	m.isminer = isminer
 	m.address = address
+	m.balance = 0
 	return &m
 }
 
@@ -61,13 +62,14 @@ func Newminer(isminer bool,address common.Address) *miner{
 func (m *miner) SendTx(address *common.Address,amount int){
 
 	//先检查是否有大于金额的余额
-	if m.getBalance() > amount{
+	if m.GetBalance() > amount{
 
 		//用户的余额足够创建这笔交易的话 将所有可用输入找出 并创建输出
 		txInputs,txOutputs := m.createTx(address,amount)
 
 		//pow创建一个区块
-		b,err := m.mineBlock(txInputs,txOutputs,amount)
+		b,err := m.mineBlock(txInputs,txOutputs)
+		fmt.Println(b)
 		if err !=nil{
 			fmt.Errorf(err.Error())
 		}else {
@@ -78,9 +80,23 @@ func (m *miner) SendTx(address *common.Address,amount int){
 }
 
 //todo：这里还有需要添加的内容
-func (m *miner) getBalance() int {
-	return 10
+func (m *miner) GetBalance() int {
+	return m.balance
 }
+
+//切换用户模式和矿工模式 就是难度的差别
+func (m *miner) ChangeMode(){
+	if m.isminer{
+		m.isminer = false
+		m.powtargetbits = common.TargetForTxBits
+	}else{
+		m.isminer = true
+		m.powtargetbits = common.TargetForMBBits
+	}
+
+}
+
+
 
 //todo:这里还有需要添加的内容
 //在自己所有可支付区块里面找到金额大于amount的所有可用块 构建输出 若所有输入大于amount则要构建一笔转回给自己的输出
@@ -95,8 +111,9 @@ func (m *miner) createTx(address *common.Address,amount int) ([]core.TxInput,[]c
 	return inputs,outputs
 }
 
+//挖矿的时候如果不做交易 也可以挖空块 不过输出要有一笔是给自己的奖励
 //挖出一个区块的过程 如果挑选的两个验证块不满足则重新挑选
-func (m *miner) mineBlock(inputs []core.TxInput,outputs []core.TxOutput,amount int) (*core.Block,error) {
+func (m *miner) mineBlock(inputs []core.TxInput,outputs []core.TxOutput) (*core.Block,error) {
 
 	var b *core.Block
 
@@ -112,7 +129,11 @@ work:
 
 		//检验两笔交易是否合理 如果验证了两笔交易没问题的话 创建区块
 		if (m.Check.CheckoutTx(b1) && m.Check.CheckoutTx(b2)) {
-			b = core.CreateBlock(&m.address,mb, b1, b2, inputs, outputs, amount, m.powtargetbits)
+			b = core.CreateBlock(&m.address,mb, b1, b2, inputs, outputs, m.powtargetbits)
+			if b == nil{
+				goto work
+			}
+
 		} else { //如果验证交易失败 说明那两笔交易区块不符合要求 不链入账本中
 
 			goto work
@@ -123,29 +144,34 @@ work:
 	if b != nil {
 		return b, nil
 	} else {
-		return nil, fmt.Errorf("nothing to send")
+		return nil, fmt.Errorf("mistake")
 	}
 }
 
 //矿工接收一个区块 blocktype是1则为主块 否则为普通块
 func (m *miner) ReceiveBlock() error{
 	b := p2p.ReceiveFromNet()
-
-	//接收到一个区块 检验是否区块结构合理 确定区块类型
-	isok,blocktype,err := m.Check.CheckoutBlock(b)
-	if err != nil{
-		fmt.Println(err)
-	}
+	isok,blocktype := m.CheckBlock(b)
 	if isok{
 		if blocktype{
 			m.MainChain.Add(b)
 		}
-		//todo:
-		//这里是要做主块跟普通块分开存放比较好呢 还是要主块存两次 或者可以到时存储同一地方 不过多个饮用
 		m.Dag.Add(b)
 		return nil
 	}
-	return fmt.Errorf("the block received is not correct,drop it")
+	return errors.New("this block is illegal")
+
+}
+
+func (m *miner) CheckBlock(b *core.Block) (bool,bool){
+
+	//接收到一个区块 检验是否区块结构合理 确定区块类型
+	isok,blocktype,err := m.Check.CheckoutBlock(b)
+	if err != nil{
+		return false,false
+	}else{
+		return isok,blocktype
+	}
 
 }
 

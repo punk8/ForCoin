@@ -40,11 +40,10 @@ func (c *Check) CheckoutBlock(block *Block) (isok bool,blocktype bool,err error)
 
 	//总共发送给人的金额
 	spend := 0
-	//区块总共的金额
-	total := block.Amount
 
 
-	//输出块获得的金额
+
+	//输出块总金额
 	receive := 0
 
 
@@ -54,6 +53,11 @@ func (c *Check) CheckoutBlock(block *Block) (isok bool,blocktype bool,err error)
 
 		//确定区块类型
 		blocktype = c.DetermineBlockType(block)
+
+		//如果是主块 检查下第一笔输出是否合理
+		if blocktype{
+			c.isCoinBase(block.SendTo[0])
+		}
 
  		//检验输入
  		for i:=0;i<len(block.TxInputs);i++{
@@ -80,23 +84,23 @@ func (c *Check) CheckoutBlock(block *Block) (isok bool,blocktype bool,err error)
 
 		}
 
- 		if spend!=total{
- 			return false,blocktype,fmt.Errorf("input isn't equal to the block amount")
-		}
+ 		//if spend!=total{
+ 		//	return false,blocktype,fmt.Errorf("input isn't equal to the block amount")
+		//}
 
 
 
 		//检验输出
 		for i:=0;i<len(block.SendTo);i++{
 			txo := block.SendTo[i]
-			if c.isBlockExit(txo.OutputAddress){
+			if c.isAddressExist(txo.OutputAddress){
 				receive += txo.Amount
 			}else{
 				return false,blocktype,fmt.Errorf("output %d is not exist",i)
 			}
 		}
 
-		if spend != receive{
+		if spend < receive{
 			return false,blocktype,fmt.Errorf("input isn't equal to the output")
 		}
 
@@ -154,5 +158,14 @@ func (c *Check) DetermineBlockType(block *Block) bool {
 }
 
 func (c *Check) traceBlock(input TxInput)bool{
+	return false
+}
+
+func(c *Check) isAddressExist(address *common.Address) bool {
+	return false
+}
+
+//检查第一笔交易是不是合法的矿工奖励
+func (c *Check) isCoinBase(txouts TxOutput) bool{
 	return false
 }
