@@ -49,11 +49,16 @@ func init(){
 	m.Check = core.NewCheck()
 }
 
+func Newminer(isminer bool,address common.Address) *miner{
+	m.isminer = isminer
+	m.address = address
+	return &m
+}
 
 
 
 //发送交易 参数：对方地址，转账金额
-func (m *miner) SendTx(address []byte,amount int){
+func (m *miner) SendTx(address *common.Address,amount int){
 
 	//先检查是否有大于金额的余额
 	if m.getBalance() > amount{
@@ -74,16 +79,19 @@ func (m *miner) SendTx(address []byte,amount int){
 
 //todo：这里还有需要添加的内容
 func (m *miner) getBalance() int {
-	return 0
+	return 10
 }
 
 //todo:这里还有需要添加的内容
 //生成Txinput和Txoutput
-func (m *miner) createTx(address []byte,amount int) ([]core.TxInput,[]core.TxOutput){
+func (m *miner) createTx(address *common.Address,amount int) ([]core.TxInput,[]core.TxOutput){
 	output1 := core.TxOutput{}
 	output2 := core.TxOutput{}
 	outputs := []core.TxOutput{output1,output2}
-	return nil,outputs
+	input1 := core.TxInput{}
+	input2 := core.TxInput{}
+	inputs := []core.TxInput{input1,input2}
+	return inputs,outputs
 }
 
 //挖出一个区块的过程 如果挑选的两个验证块不满足则重新挑选
@@ -96,6 +104,7 @@ func (m *miner) mineBlock(inputs []core.TxInput,outputs []core.TxOutput,amount i
 work:
 	{
 		mb := m.MainChain.Getlatest()
+		fmt.Println("get latestMb ...",mb)
 		//任意获取两笔其他的交易区块 //直接获取到他们的哈希值 而不是区块实例
 		b1 := m.Dag.GetTransaction()
 		b2 := m.Dag.GetTransaction()

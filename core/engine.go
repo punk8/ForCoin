@@ -22,14 +22,13 @@ func prepareData(miner *common.Address,Mainblock *common.BlockHash,BlockOne,Bloc
 	for _,tx := range(TxInputs){
 		txinHash = append(txinHash, tx.ToHash())
 	}
-
-
-
+	txin := bytes.Join(txinHash,[]byte{})
 
 	txoutHash := [][]byte{}
 	for _,txout := range(SendTo){
 		txoutHash = append(txoutHash,txout.ToHash())
 	}
+	txout := bytes.Join(txoutHash,[]byte{})
 
 	data := bytes.Join(
 		[][]byte{
@@ -42,6 +41,8 @@ func prepareData(miner *common.Address,Mainblock *common.BlockHash,BlockOne,Bloc
 			common.IntToHex(int64(nonce)),
 		},[]byte{},
 	)
+
+	data = bytes.Join([][]byte{data,txin,txout},[]byte{})
 
 	return data
 }

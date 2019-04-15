@@ -3,7 +3,6 @@ package core
 import (
 	"PunkCoin/common"
 	"crypto/sha256"
-	"fmt"
 	"math/big"
 )
 
@@ -16,7 +15,7 @@ type Mainchain struct {
 
 
 type Dag struct {
-	dag map[*common.BlockHash]*Block //存放普通区块
+	Dag map[*common.BlockHash]*Block //存放普通区块
 }
 
 
@@ -39,15 +38,13 @@ func NewDag() *Dag{
 //初始化一个主块链
 func init(){
 
-
-
 	//genesis:=
 	genesis := mc.CreateGenesisMainBlock()
 	//fmt.Println(genesis.Hash)
 	mc.Settarget(2,5)
 	mc.ChainBlocks =  [](*Block){}
-	//mc.Add(genesis)
-	dag.dag = make(map[*common.BlockHash]*Block)
+	mc.Add(genesis)
+	dag.Dag = make(map[*common.BlockHash]*Block)
 	dag.Add(genesis)
 
 }
@@ -62,6 +59,8 @@ func (mc *Mainchain) Settarget(n1,n2 uint) {
 	mc.TargetforTx.Rsh(mc.TargetforTx, uint(256-n1))
 	mc.TargetforMb.Rsh(mc.TargetforMb, uint(256-n2))
 }
+
+
 
 func (mc *Mainchain) Add(block *Block){
 	mc.ChainBlocks = append(mc.ChainBlocks, block)
@@ -102,9 +101,12 @@ func (mc *Mainchain) CreateGenesisMainBlock() *Block {
 
 	targetbits := 3
 
+	genesishash := [32]byte{2 ,246 ,70 ,22 ,170 ,146 ,154 ,243 ,166 ,14 ,199 ,197 ,155 ,12 ,234 ,103 ,143 ,170, 13, 200, 78, 52, 115, 152, 131, 47, 138, 100, 235 ,204,9,54}
+
+	hash := common.BlockHash(genesishash)
 
 	//hash,nonce := Pow([32]byte{0},[32]byte{0}, [32]byte{0}, [32]byte{0}, nil, sendto, 0, mc.TargetforMb)
-	genesis := NewBlock(&address,&MB,&B1,&B2,TxInputs,SendTo,amount,targetbits,big.NewInt(1),&B1)
+	genesis := NewBlock(&address,&MB,&B1,&B2,TxInputs,SendTo,amount,targetbits,big.NewInt(1),&hash)
 	//
 	//mc.Add(genesis)
 	//return genesis
@@ -114,15 +116,13 @@ func (mc *Mainchain) CreateGenesisMainBlock() *Block {
 
 
 func (d *Dag) Add(b *Block){
-	if d.dag == nil {
-		d.dag[b.Hash] = b
-	}else{
-		fmt.Errorf("empty")
-	}
+
+	d.Dag[b.Hash] = b
+
 }
 
 func (d *Dag) FindBlockByHash(hash *common.BlockHash) *Block {
-	return d.dag[hash]
+	return d.Dag[hash]
 }
 
 //todo:这里应该有个算法来选择dag中的哪两笔交易应该被选中
