@@ -1,12 +1,10 @@
 package client
 
 import (
-	"PunkCoin/basetool"
 	"PunkCoin/common"
 	"PunkCoin/core"
 	"PunkCoin/p2p"
 	"fmt"
-	"math/big"
 )
 
 //如果是想作为矿工来运行 难度值就会变高 如果只是作为一名用户想要进行交易 则难度值会降低
@@ -20,7 +18,7 @@ type miner struct {
 	isminer bool
 
 	//todo:这里要改成bits位数 用来减少内存占用
-	powtarget *big.Int
+	powtargetbits int
 
 	//检验机制里面已经会有主链和dag结构了
 	MainChain *core.Mainchain
@@ -29,7 +27,7 @@ type miner struct {
 
 
 	//检验机制
-	Check *basetool.Check
+	Check *core.Check
 }
 
 var m miner
@@ -42,13 +40,13 @@ func init(){
 	m.MainChain = core.NewMainChain()
 
 	if m.isminer{
-		m.powtarget = core.NewMainChain().TargetforMb
+		m.powtargetbits = 5
 	}else{
-		m.powtarget = core.NewMainChain().TargetforTx
+		m.powtargetbits = 2
 	}
 
 	//初始化校验工具
-	m.Check = basetool.NewCheck()
+	m.Check = core.NewCheck()
 }
 
 
@@ -104,7 +102,7 @@ work:
 
 		//检验两笔交易是否合理 如果验证了两笔交易没问题的话 创建区块
 		if (m.Check.CheckoutTx(b1) && m.Check.CheckoutTx(b2)) {
-			b = core.CreateBlock(&m.address,mb, b1, b2, inputs, outputs, amount, m.powtarget)
+			b = core.CreateBlock(&m.address,mb, b1, b2, inputs, outputs, amount, m.powtargetbits)
 		} else { //如果验证交易失败 说明那两笔交易区块不符合要求 不链入账本中
 
 			goto work

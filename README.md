@@ -1,1 +1,1 @@
-# PunkCoin
+a coin learning

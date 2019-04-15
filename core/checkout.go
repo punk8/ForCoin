@@ -1,15 +1,14 @@
-package basetool
+package core
 
 import (
 	"PunkCoin/common"
-	"PunkCoin/core"
 	"bytes"
 	"fmt"
 )
 
 type Check struct {
-	MainChain *core.Mainchain
-	Dag *core.Dag
+	MainChain *Mainchain
+	Dag *Dag
 }
 
 var c = &Check{}
@@ -18,9 +17,9 @@ var c = &Check{}
 func init(){
 
 	//初始化主块链
-	c.MainChain = core.NewMainChain()
+	c.MainChain = NewMainChain()
 
-	c.Dag = core.NewDag()
+	c.Dag = NewDag()
 }
 
 
@@ -31,7 +30,7 @@ func NewCheck() *Check{
 
 //检验区块结构是否没有问题 哈希值是否没问题并且返回 是主块还是普通块 主块为1 普通块为0
 //检验区块的结构包括 哈希值是否满足难度 区块的金额是否等于交易的输入 是否等于交易的输出总和 如果是一个主块的话 会有一笔额外的奖励
-func (c *Check) CheckoutBlock(block *core.Block) (isok bool,blocktype bool,err error){
+func (c *Check) CheckoutBlock(block *Block) (isok bool,blocktype bool,err error){
 	//默认为普通块
 	blocktype = false
 
@@ -118,10 +117,10 @@ func (c *Check) CheckoutTx(block *common.BlockHash) bool {
 
 //检验区块是否存在
 func (c *Check) isBlockExit(hash *common.BlockHash) bool{
-
+	return false
 }
 
-func (c *Check) InputCanUse(input core.TxInput)bool{
+func (c *Check) InputCanUse(input TxInput)bool{
 	canUse := false
 
 
@@ -150,6 +149,10 @@ func (c *Check) InputCanUse(input core.TxInput)bool{
 
 
 //用于确定区块类型 利用区块哈希值和目标值对比
-func (c *Check) DetermineBlockType(block *core.Block) bool {
+func (c *Check) DetermineBlockType(block *Block) bool {
+	return false
+}
 
+func (c *Check) traceBlock(input TxInput)bool{
+	return false
 }

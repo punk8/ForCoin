@@ -2,8 +2,8 @@ package core
 
 import (
 	"PunkCoin/common"
-	"PunkCoin/consensus"
-	"math"
+	"crypto/sha256"
+	"fmt"
 	"math/big"
 )
 
@@ -43,12 +43,12 @@ func init(){
 
 	//genesis:=
 	genesis := mc.CreateGenesisMainBlock()
+	//fmt.Println(genesis.Hash)
 	mc.Settarget(2,5)
 	mc.ChainBlocks =  [](*Block){}
 	//mc.Add(genesis)
+	dag.dag = make(map[*common.BlockHash]*Block)
 	dag.Add(genesis)
-
-
 
 }
 
@@ -78,24 +78,47 @@ func (mc *Mainchain) CreateGenesisMainBlock() *Block {
 
 	//todo：
 	//这里填写初始块输出的两个地址
-	tout1 := TxOutput{}
-	tout2 := TxOutput{}
+	//tout1 := TxOutput{}
+	//tout2 := TxOutput{}
 
 
-	sendto := []TxOutput{tout1,tout2}
+	//sendto := []TxOutput{tout1,tout2}
+
+	minerName := "punk"
+	address := common.Address(sha256.Sum256([]byte(minerName)))
+
+	mainblock := "MainBlock"
+	MB := common.BlockHash(sha256.Sum256([]byte(mainblock)))
+
+	blockOne := "blockOne"
+	B1 := common.BlockHash(sha256.Sum256([]byte(blockOne)))
+
+	blockTwo := "blockTwo"
+	B2 := common.BlockHash(sha256.Sum256([]byte(blockTwo)))
+	TxInputs := []TxInput{}
+	SendTo := []TxOutput{}
+
+	amount := 10
+
+	targetbits := 3
 
 
-	hash,nonce := consensus.Pow([32]byte{0},[32]byte{0}, [32]byte{0}, [32]byte{0}, nil, sendto, 0, mc.TargetforMb)
-	genesis := NewBlock([32]byte{0},[32]byte{0},[32]byte{0},[32]byte{0},nil,sendto,0,mc.TargetforMb,nonce,&hash)
-
-	mc.Add(genesis)
+	//hash,nonce := Pow([32]byte{0},[32]byte{0}, [32]byte{0}, [32]byte{0}, nil, sendto, 0, mc.TargetforMb)
+	genesis := NewBlock(&address,&MB,&B1,&B2,TxInputs,SendTo,amount,targetbits,big.NewInt(1),&B1)
+	//
+	//mc.Add(genesis)
+	//return genesis
 	return genesis
 }
 
 
 
 func (d *Dag) Add(b *Block){
-	d.dag[b.Hash] = b
+	if d.dag == nil {
+		d.dag[b.Hash] = b
+	}else{
+		fmt.Errorf("empty")
+	}
 }
 
 func (d *Dag) FindBlockByHash(hash *common.BlockHash) *Block {
@@ -104,5 +127,5 @@ func (d *Dag) FindBlockByHash(hash *common.BlockHash) *Block {
 
 //todo:这里应该有个算法来选择dag中的哪两笔交易应该被选中
 func (d *Dag) GetTransaction() (*common.BlockHash){
-
+	return nil
 }

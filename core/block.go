@@ -1,9 +1,7 @@
 package core
 
 import (
-	"PunkCoin/basetool"
 	"PunkCoin/common"
-	"PunkCoin/consensus"
 	"bytes"
 
 	"math/big"
@@ -42,8 +40,8 @@ type Block struct {
 	//难度值
 	nonce *big.Int
 
-	//目标值
-	target *big.Int
+	//目标值比特位
+	targetbits int
 }
 
 type TxInput struct {
@@ -58,6 +56,17 @@ type TxInput struct {
 	Index int
 }
 
+func (txin *TxInput) ToHash() []byte {
+	hash := bytes.Join(
+		[][]byte{
+			[]byte((*txin.InputAddress)[:]),
+			txin.decScript,
+			common.IntToHex(int64(txin.Index)),
+		},[]byte{},
+	)
+	return hash
+}
+
 type TxOutput struct {
 
 	//输出的地址
@@ -70,6 +79,16 @@ type TxOutput struct {
 	Amount int
 }
 
+func (txout *TxOutput) ToHash() []byte{
+	hash := bytes.Join(
+		[][]byte{
+			[]byte((*txout.OutputAddress)[:]),
+			txout.encScript,
+			common.IntToHex(int64(txout.Amount)),
+		},[]byte{},
+	)
+	return hash
+}
 //全局的主块链
 
 //var targetforTx = big.NewInt(math.MaxInt64)
@@ -95,12 +114,12 @@ type TxOutput struct {
 //}
 
 
-func NewBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,amount int,target *big.Int,nonce *big.Int,hash *common.BlockHash)*Block{
-	return &Block{MinerAddress:miner,Hash:hash,Mainblock:Mainblock,BlockOne:BlockOne,BlockTwo:BlockTwo,TxInputs:TxInputs,SendTo:SendTo,Amount:amount,nonce:nonce,target:target}
+func NewBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,amount int,targetbits int,nonce *big.Int,hash *common.BlockHash)*Block{
+	return &Block{MinerAddress:miner,Hash:hash,Mainblock:Mainblock,BlockOne:BlockOne,BlockTwo:BlockTwo,TxInputs:TxInputs,SendTo:SendTo,Amount:amount,nonce:nonce,targetbits:targetbits}
 }
 
 //在调用该函数时 已经检验过交易的脚本是否满足，交易的输入输出已经构建好
-func CreateBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,amount int,target *big.Int) *Block {
+func CreateBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,amount int,targetbits int) *Block {
 
 	//判断当前主块是不是最新
 
@@ -108,10 +127,12 @@ func CreateBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,Bloc
 	if bytes.Equal(latest[:],Mainblock[:]){
 		//如果是最新的话,验证两笔交易
 		// 如果所有输入块有足够的余额用于输出 其实用户交易时已经经过检测
-		if basetool.GetBalance(TxInputs) > amount && basetool.Calculate(SendTo) == amount {
-				hash, nonce := consensus.Pow(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, amount, target)
+		if GetBalance(TxInputs) > amount && Calculate(SendTo) == amount {
 
-				block := NewBlock(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, amount, target, nonce, &hash)
+
+				hash, nonce := Pow(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, amount, targetbits)
+
+				block := NewBlock(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, amount, targetbits, nonce, &hash)
 				return block
 			}else {
 				return nil

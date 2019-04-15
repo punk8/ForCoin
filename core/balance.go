@@ -1,12 +1,8 @@
-package basetool
-
-import (
-	"PunkCoin/core"
-)
+package core
 
 type Account struct {
-	MainChain *core.Mainchain
-	Dag *core.Dag
+	MainChain *Mainchain
+	Dag *Dag
 }
 
 var acc = &Account{}
@@ -15,14 +11,14 @@ var acc = &Account{}
 func init(){
 
 	//初始化主块链
-	acc.MainChain = core.NewMainChain()
+	acc.MainChain = NewMainChain()
 
-	acc.Dag = core.NewDag()
+	acc.Dag = NewDag()
 }
 
 
 
-func GetBalance(txins []core.TxInput) int {
+func GetBalance(txins []TxInput) int {
 
 	balance := 0
 
@@ -37,7 +33,7 @@ func GetBalance(txins []core.TxInput) int {
 	return balance
 }
 
-func Calculate(txouts[]core.TxOutput) int{
+func Calculate(txouts[]TxOutput) int{
 
 	out := 0
 
