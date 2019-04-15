@@ -15,11 +15,8 @@ type Mainchain struct {
 
 
 type Dag struct {
-	Dag map[*common.BlockHash]*Block //存放普通区块
+	Dag map[*common.BlockHash]*Block //存放所有区块
 }
-
-
-
 
 //var targetforTx = big.NewInt(math.MaxInt64)
 //var targetforMb = big.NewInt(math.MaxInt64)
@@ -31,6 +28,7 @@ var dag = &Dag{}
 func NewMainChain() *Mainchain {
 	return mc
 }
+//返回一个Dag实例
 func NewDag() *Dag{
 	return dag
 }

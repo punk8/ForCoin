@@ -7,11 +7,6 @@ import (
 	"math/big"
 )
 
-
-
-
-
-
 type Block struct {
 
 	//矿工自身地址
@@ -34,7 +29,7 @@ type Block struct {
 	//交易输出的地址方 第一笔是用来主块奖励给自己的 其他笔是用来发送给对方和给自己找零的
 	SendTo []TxOutput
 
-	//交易金额
+	//交易金额 似乎不用这个字段 因为区块的输入输出都会是一样的 反而如果是主块的话会多出一笔矿工奖励
 	Amount int
 
 	//难度值
@@ -127,7 +122,7 @@ func CreateBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,Bloc
 	if bytes.Equal(latest[:],Mainblock[:]){
 		//如果是最新的话,验证两笔交易
 		// 如果所有输入块有足够的余额用于输出 其实用户交易时已经经过检测
-		if GetBalance(TxInputs) > amount && Calculate(SendTo) == amount {
+		if GetBalance(TxInputs) >= amount && Calculate(SendTo) >= amount {
 
 
 				hash, nonce := Pow(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, amount, targetbits)
@@ -144,3 +139,7 @@ func CreateBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,Bloc
 
 }
 
+
+func (b *Block) GetNonce() *big.Int{
+	return b.nonce
+}

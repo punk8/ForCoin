@@ -83,6 +83,7 @@ func (m *miner) getBalance() int {
 }
 
 //todo:这里还有需要添加的内容
+//在自己所有可支付区块里面找到金额大于amount的所有可用块 构建输出 若所有输入大于amount则要构建一笔转回给自己的输出
 //生成Txinput和Txoutput
 func (m *miner) createTx(address *common.Address,amount int) ([]core.TxInput,[]core.TxOutput){
 	output1 := core.TxOutput{}
