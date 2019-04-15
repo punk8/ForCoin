@@ -84,6 +84,10 @@ func (txout *TxOutput) ToHash() []byte{
 	)
 	return hash
 }
+
+func (txout *TxOutput) GetEncScript() []byte{
+	return txout.encScript
+}
 //全局的主块链
 
 //var targetforTx = big.NewInt(math.MaxInt64)

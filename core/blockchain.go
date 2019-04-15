@@ -1,6 +1,7 @@
 package core
 
 import (
+
 	"PunkCoin/common"
 	"crypto/sha256"
 	"math/big"
@@ -123,11 +124,6 @@ func (d *Dag) FindBlockByHash(hash *common.BlockHash) *Block {
 
 //todo:这里应该有个算法来选择dag中的哪两笔交易应该被选中
 func (d *Dag) GetTransaction() (*common.BlockHash){
-
-	if len(d.Dag)<2{
-		for _,v := range d.Dag{
-			return v.Hash
-		}
-	}
-	return nil
+	hash := common.BlockHash{2,246,70,22,170,146,154,243,166,14,199,197,155,12,234,103,143,170,13,200,78,52,115,152,131,47,138,100,235,204,9,54}
+	return &hash
 }

@@ -26,6 +26,9 @@ func prepareData(miner *common.Address,Mainblock *common.BlockHash,BlockOne,Bloc
 
 	txoutHash := [][]byte{}
 	for _,txout := range(SendTo){
+		if txout.OutputAddress == nil {
+			continue
+		}
 		txoutHash = append(txoutHash,txout.ToHash())
 	}
 	txout := bytes.Join(txoutHash,[]byte{})

@@ -52,7 +52,7 @@ func init(){
 func Newminer(isminer bool,address common.Address) *miner{
 	m.isminer = isminer
 	m.address = address
-	m.balance = 0
+	m.balance = 100
 	return &m
 }
 
@@ -102,12 +102,13 @@ func (m *miner) ChangeMode(){
 //在自己所有可支付区块里面找到金额大于amount的所有可用块 构建输出 若所有输入大于amount则要构建一笔转回给自己的输出
 //生成Txinput和Txoutput
 func (m *miner) createTx(address *common.Address,amount int) ([]core.TxInput,[]core.TxOutput){
-	output1 := core.TxOutput{}
+	output1 := core.TxOutput{OutputAddress:&m.address,Amount:10}
 	output2 := core.TxOutput{}
 	outputs := []core.TxOutput{output1,output2}
-	input1 := core.TxInput{}
-	input2 := core.TxInput{}
-	inputs := []core.TxInput{input1,input2}
+
+
+
+	inputs := []core.TxInput{}
 	return inputs,outputs
 }
 

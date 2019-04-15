@@ -12,6 +12,13 @@ func main() {
 
 	fmt.Println("hello world")
 
+	txout1 := core.TxOutput{}
+
+	b := txout1.OutputAddress == nil
+
+	fmt.Println(b)
+
+
 	minerName := "punk"
 	address := common.Address(sha256.Sum256([]byte(minerName)))
 
@@ -51,6 +58,8 @@ func main() {
 	dag := core.NewDag()
 	for k,_ := range dag.Dag{
 		fmt.Println(dag.Dag[k].Hash)
+		fmt.Println(k)
+
 	}
 	fmt.Println(dag.Dag)
 

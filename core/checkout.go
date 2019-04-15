@@ -115,7 +115,7 @@ func (c *Check) CheckoutBlock(block *Block) (isok bool,blocktype bool,err error)
 }
 
 func (c *Check) CheckoutTx(block *common.BlockHash) bool {
-	return false
+	return true
 }
 
 
