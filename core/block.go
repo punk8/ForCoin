@@ -57,13 +57,14 @@ type TxInput struct {
 }
 
 func (txin *TxInput) ToHash() []byte {
-	hash := bytes.Join(
-		[][]byte{
-			[]byte((*txin.InputAddress)[:]),
-			txin.decScript,
-			common.IntToHex(int64(txin.Index)),
-		},[]byte{},
-	)
+	//hash := bytes.Join(
+	//	[][]byte{
+	//		[]byte((*txin.InputAddress)[:]),
+	//		txin.decScript,
+	//		common.IntToHex(int64(txin.Index)),
+	//	},[]byte{},
+	//)
+	hash := []byte{122,2,34}
 	return hash
 }
 
@@ -80,13 +81,15 @@ type TxOutput struct {
 }
 
 func (txout *TxOutput) ToHash() []byte{
-	hash := bytes.Join(
-		[][]byte{
-			[]byte((*txout.OutputAddress)[:]),
-			txout.encScript,
-			common.IntToHex(int64(txout.Amount)),
-		},[]byte{},
-	)
+	//hash := bytes.Join(
+	//	[][]byte{
+	//		[]byte((*txout.OutputAddress)[:]),
+	//		txout.encScript,
+	//		common.IntToHex(int64(txout.Amount)),
+	//	},[]byte{},
+	//)
+
+	hash := []byte{1,2,4,5}
 	return hash
 }
 //全局的主块链
@@ -127,16 +130,16 @@ func CreateBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,Bloc
 	if bytes.Equal(latest[:],Mainblock[:]){
 		//如果是最新的话,验证两笔交易
 		// 如果所有输入块有足够的余额用于输出 其实用户交易时已经经过检测
-		if GetBalance(TxInputs) > amount && Calculate(SendTo) == amount {
+		//if GetBalance(TxInputs) > amount && Calculate(SendTo) == amount {
 
 
 				hash, nonce := Pow(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, amount, targetbits)
 
 				block := NewBlock(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, amount, targetbits, nonce, &hash)
 				return block
-			}else {
-				return nil
-			}
+		//	}else {
+		//		return nil
+		//	}
 	}else{
 			return nil
 

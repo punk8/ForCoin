@@ -34,8 +34,8 @@ func prepareData(miner *common.Address,Mainblock *common.BlockHash,BlockOne,Bloc
 		[][]byte{
 			[]byte((*miner)[:]),
 			[]byte((*Mainblock)[:]),
-			[]byte((*BlockOne)[:]),
-			[]byte((*BlockTwo)[:]),
+			//[]byte((*BlockOne)[:]),
+			//[]byte((*BlockTwo)[:]),
 			common.IntToHex(int64(amount)),
 			common.IntToHex(int64(targetbits)),
 			common.IntToHex(int64(nonce)),
@@ -56,21 +56,20 @@ func Pow(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *co
 	var hash [32]byte
 	nonce := 0
 
-	fmt.Println("当前挖矿计算的数据")
 
 	Target := big.NewInt(1)
 
 	//TargetforTx > TragetForMb 所以小于targetforTx的比较容易
 	Target.Lsh(Target, uint(256-targetbits))
 
-	fmt.Println("current diff",Target)
+	fmt.Println("当前难度:\n",Target)
 
 
 	for nonce < common.MaxNonce{
 		data := prepareData(miner,Mainblock,BlockOne,BlockTwo,TxInputs,SendTo,amount,targetbits,nonce)//准备好的数据
 		//fmt.Println(data)
 		hash = sha256.Sum256(data)//计算出哈希
-		fmt.Printf("\r%x\n",hash)//打印显示哈希
+		fmt.Printf("[mining...] :%x\n",hash)//打印显示哈希
 
 		hashInt.SetBytes(hash[:])//获取要对比的数据
 		//10000000000000000000000000000000000000000000000000000000000
@@ -81,7 +80,6 @@ func Pow(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *co
 			nonce+=1
 		}
 	}
-	fmt.Println("\n\nhello world")
 	return hash,big.NewInt(int64(nonce))//nonce 解题的答案，hash当前的哈希
 }
 

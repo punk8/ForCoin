@@ -58,7 +58,7 @@ func Newminer(isminer bool,address common.Address) *miner{
 
 
 //发送交易 参数：对方地址，转账金额
-func (m *miner) SendTx(address *common.Address,amount int){
+func (m *miner) SendTx(address *common.Address,amount int) *core.Block {
 
 	//先检查是否有大于金额的余额
 	if m.getBalance() > amount{
@@ -68,13 +68,17 @@ func (m *miner) SendTx(address *common.Address,amount int){
 
 		//pow创建一个区块
 		b,err := m.mineBlock(txInputs,txOutputs,amount)
+
 		if err !=nil{
 			fmt.Errorf(err.Error())
 		}else {
+			return b
 			p2p.SendToNet(b) //将区块发送到网络中
 		}
+	}else{
+		return nil
 	}
-
+	return nil
 }
 
 //todo：这里还有需要添加的内容
@@ -101,21 +105,21 @@ func (m *miner) mineBlock(inputs []core.TxInput,outputs []core.TxOutput,amount i
 
 	//获取当前区块链中最新的主块 //这里最后要改成获取到的是直接哈希值 而不是一个区块
 	//如果验证交易失败的话 就重新进行一次
-work:
+//work:
 	{
 		mb := m.MainChain.Getlatest()
-		fmt.Println("get latestMb ...",mb)
+		fmt.Println("最新的主块 : \n",*mb)
 		//任意获取两笔其他的交易区块 //直接获取到他们的哈希值 而不是区块实例
 		b1 := m.Dag.GetTransaction()
 		b2 := m.Dag.GetTransaction()
 
 		//检验两笔交易是否合理 如果验证了两笔交易没问题的话 创建区块
-		if (m.Check.CheckoutTx(b1) && m.Check.CheckoutTx(b2)) {
+		//if (m.Check.CheckoutTx(b1) && m.Check.CheckoutTx(b2)) {
 			b = core.CreateBlock(&m.address,mb, b1, b2, inputs, outputs, amount, m.powtargetbits)
-		} else { //如果验证交易失败 说明那两笔交易区块不符合要求 不链入账本中
+		//} else { //如果验证交易失败 说明那两笔交易区块不符合要求 不链入账本中
 
-			goto work
-		}
+		//	goto work
+		//}
 
 	}
 
