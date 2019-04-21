@@ -69,7 +69,7 @@ func (m *miner) SendTx(address *common.Address,amount int){
 
 		//pow创建一个区块
 		b,err := m.mineBlock(txInputs,txOutputs)
-		fmt.Println(b)
+		fmt.Printf("%x",*b.Hash)
 		if err !=nil{
 			fmt.Errorf(err.Error())
 		}else {
@@ -123,7 +123,7 @@ func (m *miner) mineBlock(inputs []core.TxInput,outputs []core.TxOutput) (*core.
 work:
 	{
 		mb := m.MainChain.Getlatest()
-		fmt.Println("get latestMb ...",mb)
+		fmt.Printf("get latestMb ...\n%x\n\n",*mb)
 		//任意获取两笔其他的交易区块 //直接获取到他们的哈希值 而不是区块实例
 		b1 := m.Dag.GetTransaction()
 		b2 := m.Dag.GetTransaction()

@@ -37,6 +37,10 @@ type Block struct {
 
 	//目标值比特位
 	targetbits int
+
+	//区块高度
+	//BlockHeight
+	Number *big.Int
 }
 
 type TxInput struct {
@@ -113,12 +117,12 @@ func (txout *TxOutput) GetEncScript() []byte{
 //}
 
 
-func NewBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,targetbits int,nonce *big.Int,hash *common.BlockHash)*Block{
-	return &Block{MinerAddress:miner,Hash:hash,Mainblock:Mainblock,BlockOne:BlockOne,BlockTwo:BlockTwo,TxInputs:TxInputs,SendTo:SendTo,nonce:nonce,targetbits:targetbits}
+func NewBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,targetbits int,nonce *big.Int,hash *common.BlockHash,numeber *big.Int)*Block{
+	return &Block{MinerAddress:miner,Hash:hash,Mainblock:Mainblock,BlockOne:BlockOne,BlockTwo:BlockTwo,TxInputs:TxInputs,SendTo:SendTo,nonce:nonce,targetbits:targetbits,Number:numeber}
 }
 
 //在调用该函数时 已经检验过交易的脚本是否满足，交易的输入输出已经构建好
-func CreateBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,targetbits int) *Block {
+func CreateBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,targetbits int,number *big.Int) *Block {
 
 	//判断当前主块是不是最新
 
@@ -133,9 +137,9 @@ func CreateBlock(miner *common.Address,Mainblock *common.BlockHash,BlockOne,Bloc
 		if GetBalance(TxInputs) == Calculate(SendTo){
 
 
-				hash, nonce := Pow(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, targetbits)
+				hash, nonce := Pow(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, targetbits,number)
 
-				block := NewBlock(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, targetbits, nonce, &hash)
+				block := NewBlock(miner,Mainblock, BlockOne, BlockTwo, TxInputs, SendTo, targetbits, nonce, &hash,number)
 				return block
 			}else {
 				return nil

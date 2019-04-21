@@ -2,7 +2,6 @@ package core
 
 import (
 	"PunkCoin/common"
-	"bytes"
 	"crypto/sha256"
 	"fmt"
 	"math/big"
@@ -16,41 +15,41 @@ type PoW struct {
 //pow调用basetool的哈希函数来进行哈希运算
 
 
-func prepareData(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,targetbits int,nonce int) []byte {
+//func prepareData(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,targetbits int,nonce int) []byte {
+//
+//	txinHash := [][]byte{}
+//	for _,tx := range(TxInputs){
+//		txinHash = append(txinHash, tx.ToHash())
+//	}
+//	txin := bytes.Join(txinHash,[]byte{})
+//
+//	txoutHash := [][]byte{}
+//	for _,txout := range(SendTo){
+//		if txout.OutputAddress == nil {
+//			continue
+//		}
+//		txoutHash = append(txoutHash,txout.ToHash())
+//	}
+//	txout := bytes.Join(txoutHash,[]byte{})
+//
+//	data := bytes.Join(
+//		[][]byte{
+//			[]byte((*miner)[:]),
+//			[]byte((*Mainblock)[:]),
+//			[]byte((*BlockOne)[:]),
+//			[]byte((*BlockTwo)[:]),
+//
+//			common.IntToHex(int64(targetbits)),
+//			common.IntToHex(int64(nonce)),
+//		},[]byte{},
+//	)
+//
+//	data = bytes.Join([][]byte{data,txin,txout},[]byte{})
+//
+//	return data
+//}
 
-	txinHash := [][]byte{}
-	for _,tx := range(TxInputs){
-		txinHash = append(txinHash, tx.ToHash())
-	}
-	txin := bytes.Join(txinHash,[]byte{})
-
-	txoutHash := [][]byte{}
-	for _,txout := range(SendTo){
-		if txout.OutputAddress == nil {
-			continue
-		}
-		txoutHash = append(txoutHash,txout.ToHash())
-	}
-	txout := bytes.Join(txoutHash,[]byte{})
-
-	data := bytes.Join(
-		[][]byte{
-			[]byte((*miner)[:]),
-			[]byte((*Mainblock)[:]),
-			[]byte((*BlockOne)[:]),
-			[]byte((*BlockTwo)[:]),
-
-			common.IntToHex(int64(targetbits)),
-			common.IntToHex(int64(nonce)),
-		},[]byte{},
-	)
-
-	data = bytes.Join([][]byte{data,txin,txout},[]byte{})
-
-	return data
-}
-
-func Pow(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,targetbits int) (common.BlockHash,*big.Int) {
+func Pow(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *common.BlockHash,TxInputs []TxInput,SendTo []TxOutput,targetbits int,number *big.Int) (common.BlockHash,*big.Int) {
 
 	//return [32]byte{},nonce
 
@@ -66,11 +65,11 @@ func Pow(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *co
 	//TargetforTx > TragetForMb 所以小于targetforTx的比较容易
 	Target.Lsh(Target, uint(256-targetbits))
 
-	fmt.Println("current diff",Target)
+	fmt.Printf("current diff\n%x\n",Target)
 
 
 	for nonce < common.MaxNonce{
-		data := prepareData(miner,Mainblock,BlockOne,BlockTwo,TxInputs,SendTo,targetbits,nonce)//准备好的数据
+		data := PrepareData(miner,Mainblock,BlockOne,BlockTwo,TxInputs,SendTo,targetbits,big.NewInt(int64(nonce)),number)//准备好的数据
 		//fmt.Println(data)
 		hash = sha256.Sum256(data)//计算出哈希
 		fmt.Printf("\r%x\n",hash)//打印显示哈希
@@ -84,7 +83,7 @@ func Pow(miner *common.Address,Mainblock *common.BlockHash,BlockOne,BlockTwo *co
 			nonce+=1
 		}
 	}
-	fmt.Println("\n\nhello world")
+	fmt.Println("\nmining done")
 	return hash,big.NewInt(int64(nonce))//nonce 解题的答案，hash当前的哈希
 }
 
